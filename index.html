@@ -41,6 +41,22 @@
   @keyframes clownshake { 0%{transform:translate(-4px,-3px) rotate(-2deg);} 25%{transform:translate(4px,3px) rotate(2deg);} 50%{transform:translate(-3px,4px) rotate(-1deg);} 75%{transform:translate(3px,-4px) rotate(1deg);} 100%{transform:translate(-4px,2px) rotate(-2deg);} }
 
   @media (max-width: 600px) { h1 { font-size: 1.4rem; } }
+
+  /* FLIP CARDS */
+  h2.open-title { font-size: 1.4rem; color: #f472b6; text-align: center; margin: 3rem 0 0.4rem; }
+  .open-subtitle { text-align: center; color: #94a3b8; font-size: 0.85rem; margin-bottom: 1.5rem; }
+  .flip-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1rem; }
+  .flip-wrap { perspective: 1000px; height: 180px; cursor: pointer; }
+  .flip-inner { position: relative; width: 100%; height: 100%; transform-style: preserve-3d; transition: transform 0.55s cubic-bezier(.4,0,.2,1); }
+  .flip-wrap.flipped .flip-inner { transform: rotateY(180deg); }
+  .flip-front, .flip-back { position: absolute; inset: 0; border-radius: 14px; padding: 1.2rem 1.4rem; backface-visibility: hidden; -webkit-backface-visibility: hidden; display: flex; flex-direction: column; justify-content: center; }
+  .flip-front { background: #1e293b; border: 1px solid #334155; }
+  .flip-front .card-num { font-size: 0.75rem; color: #64748b; margin-bottom: 0.5rem; }
+  .flip-front .card-q { font-weight: 500; line-height: 1.4; color: #e2e8f0; }
+  .flip-front .card-hint { font-size: 0.75rem; color: #475569; margin-top: auto; padding-top: 0.8rem; }
+  .flip-back { background: #0f3460; border: 1px solid #6366f1; transform: rotateY(180deg); }
+  .flip-back .card-a { font-size: 0.9rem; line-height: 1.5; color: #c7d2fe; }
+  .flip-back .card-label { font-size: 0.7rem; color: #818cf8; margin-bottom: 0.4rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; }
 </style>
 </head>
 <body>
@@ -59,6 +75,10 @@
 
 <button class="btn" onclick="checkAll()">Corriger tout</button>
 <button class="btn btn-reset" onclick="resetQuiz()">Recommencer</button>
+
+<h2 class="open-title">✏️ Questions à réponse ouverte</h2>
+<p class="open-subtitle">Réfléchis à ta réponse, puis clique la carte pour voir la correction</p>
+<div class="flip-grid" id="flip-quiz"></div>
 
 <!-- JUMPSCARE -->
 <div id="sasha" onclick="dismissSasha()">
@@ -267,7 +287,62 @@ function dismissSasha() {
   localStorage.setItem('sasha_seen', '1');
 }
 
+// === OPEN QUESTIONS ===
+const openQuestions = [
+  // Lab 1
+  { section: "Lab 1 — CCM", q: "Explique le principe de la chromatographie sur couche mince (CCM) en quelques phrases.", a: "La CCM sépare des composés selon leur affinité relative entre une phase stationnaire (gel de silice polaire) et une phase mobile (solvant). Les composés plus affins pour la phase stationnaire migrent moins vite, donnant un Rf faible. Ceux plus affins pour le solvant migrent plus loin, donnant un Rf élevé." },
+  { section: "Lab 1 — CCM", q: "Comment identifie-t-on un médicament inconnu à partir de sa plaque CCM ?", a: "On compare les valeurs de Rf de l'inconnu avec ceux des composés purs de référence (acide acétylsalicylique, acétaminophène, caféine, phénacétine, salicylamide). Si les taches de l'inconnu coïncident avec certaines références, le médicament contient ces composés." },
+  { section: "Lab 1 — CCM", q: "Pourquoi utilise-t-on à la fois la lampe UV et la chambre à iode pour révéler les taches ?", a: "La lampe UV détecte les composés aromatiques (qui absorbent l'UV). La chambre à iode révèle les composés insaturés et certains composés organiques. Les deux méthodes sont complémentaires : un composé peut être visible à l'une mais pas l'autre." },
+  // Lab 2
+  { section: "Lab 2 — Modèles moléculaires", q: "Calcule le degré d'insaturation de C₆H₆ (benzène) et explique ce qu'il signifie.", a: "DI = (2×6 + 2 − 6) / 2 = (14 − 6) / 2 = 4. Cela correspond à 3 doubles liaisons + 1 cycle (cycle benzénique aromatique). Un DI ≥ 4 avec un cycle aromatique est cohérent." },
+  { section: "Lab 2 — Modèles moléculaires", q: "Quelle est la différence entre un isomère de position et un isomère fonctionnel ? Donne un exemple de chaque.", a: "Isomère de position : même groupe fonctionnel, mais à un endroit différent sur la chaîne. Ex : 1-propanol vs 2-propanol. Isomère fonctionnel : même formule moléculaire, groupes fonctionnels différents. Ex : éthanol (alcool) vs méthoxyméthane (éther), C₂H₆O." },
+  { section: "Lab 2 — Modèles moléculaires", q: "Décris la géométrie d'un carbone sp² et donne un exemple de molécule contenant ce type de carbone.", a: "Un carbone sp² forme 3 liaisons σ dans un plan, avec des angles de 120°. La géométrie est trigonale plane. Il participe à une double liaison (une liaison π hors du plan). Exemple : l'éthylène (CH₂=CH₂) ou l'acide acétique (groupement C=O)." },
+  { section: "Lab 2 — Modèles moléculaires", q: "Quelles sont les 3 conformations importantes d'un alcane et laquelle est la plus stable ?", a: "1) Décalée (staggered) : groupes alternés, liaisons éloignées → plus stable. 2) Éclipsée (eclipsed) : groupes alignés, répulsion maximale → moins stable. 3) Gauche : décalée mais groupes volumineux proches → intermédiaire. La conformation décalée anti est la plus stable." },
+  // Labs 3&4
+  { section: "Labs 3&4 — Estérification", q: "Écris l'équation globale de la synthèse de l'acétate d'isoamyle (huile de banane).", a: "CH₃COOH + (CH₃)₂CHCH₂CH₂OH ⇌ CH₃COOCH₂CH₂CH(CH₃)₂ + H₂O\n(Acide acétique + 3-méthylbutan-1-ol ⇌ Acétate d'isoamyle + Eau, catalysée par H₂SO₄, chauffée)" },
+  { section: "Labs 3&4 — Estérification", q: "Explique pourquoi on utilise un excès d'acide acétique plutôt qu'un excès d'alcool.", a: "La réaction est à l'équilibre (réversible). Selon le principe de Le Chatelier, augmenter la concentration d'un réactif déplace l'équilibre vers les produits. On choisit l'acide acétique car il est moins cher, moins dangereux et plus facile à éliminer par lavage à l'eau que l'alcool isoamylique." },
+  { section: "Labs 3&4 — Estérification", q: "Décris les étapes de purification de l'acétate d'isoamyle après la réaction (semaine 1).", a: "1) Lavage eau glacée distillée : élimine acide acétique et alcool (solubles dans l'eau). 2) Lavage eau distillée : retire les impuretés restantes. 3) Lavage NaHCO₃ 5% : neutralise et élimine l'acide acétique résiduel (COO⁻ soluble). 4) Séchage sur MgSO₄ anhydre : absorbe l'eau résiduelle dans la phase organique." },
+  { section: "Labs 3&4 — Estérification", q: "Comment calcule-t-on le rendement d'une réaction ? Explique les facteurs qui peuvent le diminuer.", a: "Rendement (%) = (masse obtenue / masse théorique) × 100. Facteurs de diminution : réaction incomplète (équilibre), pertes lors des lavages/transferts, distillation imprécise (mauvaise collecte du plateau), présence d'impuretés dans le produit final." },
+  { section: "Labs 3&4 — Estérification", q: "Quels pics IR confirment la présence de l'ester (acétate d'isoamyle) et pourquoi sont-ils caractéristiques ?", a: "1) C=O ester : ~1735 cm⁻¹ (absorption forte, typique des esters, légèrement plus élevé que cétone ~1715 cm⁻¹). 2) C-O : bandes multiples entre 1000-1300 cm⁻¹. L'absence de pic large O-H (~3300 cm⁻¹) confirme qu'il n'y a plus d'acide carboxylique." },
+  // Lab 5
+  { section: "Lab 5 — Saponification", q: "Écris l'équation générale de la saponification d'un triglycéride.", a: "Triglycéride + 3 NaOH → Glycérol + 3 RCOO⁻Na⁺\nOù R est une longue chaîne alkyle (acide gras). Les sels de carboxylate (RCOO⁻Na⁺) sont le savon." },
+  { section: "Lab 5 — Saponification", q: "Explique la structure amphiphile d'un savon et son rôle dans le nettoyage.", a: "Le savon possède une tête hydrophile (COO⁻Na⁺, ionique, attirée par l'eau) et une queue hydrophobe (chaîne alkyle longue, attirée par les graisses). En solution, les molécules s'organisent en micelles : queues vers l'intérieur (emprisonnent la graisse), têtes vers l'extérieur (en contact avec l'eau). La graisse est ainsi émulsifiée et éliminée par rinçage." },
+  { section: "Lab 5 — Saponification", q: "Pourquoi le savon fait-il des dépôts en eau dure ? Écris la réaction.", a: "Les ions Ca²⁺ et Mg²⁺ présents dans l'eau dure réagissent avec les savons pour former des sels insolubles :\n2 RCOONa + CaCl₂ → (RCOO)₂Ca↓ + 2 NaCl\nLe précipité (RCOO)₂Ca est insoluble : le savon perd son efficacité et laisse des résidus blanchâtres." },
+  { section: "Lab 5 — Saponification", q: "Décris brièvement le protocole de fabrication du savon au labo (étapes clés).", a: "1) Fondre ~12g huile de coco + ~38g huile d'olive à 60°C. 2) Dissoudre ~7g NaOH dans 17mL d'eau (solution lessive). 3) Ajouter la lessive à l'huile, mélanger 30-45 min à 50-60°C. 4) Observer la 'trace' (épaississement). 5) Vérifier pH (~9-10). 6) Ajouter huile essentielle. 7) Couler en moule, solidifier 24h, curer 2 semaines." },
+];
+
+function buildFlipQuiz() {
+  const grid = document.getElementById('flip-quiz');
+  let currentSection = '';
+  openQuestions.forEach((item, i) => {
+    if (item.section !== currentSection) {
+      currentSection = item.section;
+      const sep = document.createElement('div');
+      sep.style.cssText = 'grid-column:1/-1; font-size:0.85rem; color:#7dd3fc; border-left:3px solid #38bdf8; padding-left:0.6rem; margin-top:0.5rem;';
+      sep.textContent = currentSection;
+      grid.appendChild(sep);
+    }
+    const wrap = document.createElement('div');
+    wrap.className = 'flip-wrap';
+    wrap.innerHTML = `
+      <div class="flip-inner">
+        <div class="flip-front">
+          <div class="card-num">Q${i + 1}</div>
+          <div class="card-q">${item.q}</div>
+          <div class="card-hint">↩ cliquer pour voir la réponse</div>
+        </div>
+        <div class="flip-back">
+          <div class="card-label">Réponse</div>
+          <div class="card-a">${item.a.replace(/\n/g, '<br>')}</div>
+        </div>
+      </div>`;
+    wrap.addEventListener('click', () => wrap.classList.toggle('flipped'));
+    grid.appendChild(wrap);
+  });
+}
+
 buildQuiz();
+buildFlipQuiz();
 initSasha();
 </script>
 </body>
