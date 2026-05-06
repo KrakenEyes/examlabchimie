@@ -3,82 +3,314 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Quiz Chimie — Test de Labo</title>
+<title>Révision — Test de Labo Chimie</title>
 <style>
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family: 'Segoe UI', sans-serif; background: #0f172a; color: #e2e8f0; min-height: 100vh; padding: 2rem 1rem; }
-  h1 { text-align: center; font-size: 2rem; color: #38bdf8; margin-bottom: 0.5rem; }
-  .subtitle { text-align: center; color: #94a3b8; margin-bottom: 2rem; font-size: 0.9rem; }
-  .progress-bar { background: #1e293b; border-radius: 8px; height: 8px; margin-bottom: 2rem; }
-  .progress-fill { background: #38bdf8; height: 8px; border-radius: 8px; transition: width 0.3s; }
-  .section-title { font-size: 1.2rem; color: #7dd3fc; border-left: 4px solid #38bdf8; padding-left: 0.8rem; margin: 2rem 0 1rem; }
-  .question { background: #1e293b; border-radius: 12px; padding: 1.5rem; margin-bottom: 1rem; border: 1px solid #334155; }
-  .question p { font-weight: 500; margin-bottom: 1rem; line-height: 1.5; }
-  .options label { display: flex; align-items: flex-start; gap: 0.6rem; padding: 0.6rem 0.8rem; border-radius: 8px; cursor: pointer; transition: background 0.15s; margin-bottom: 0.4rem; border: 1px solid transparent; }
-  .options label:hover { background: #334155; }
-  .options input[type="radio"] { margin-top: 3px; accent-color: #38bdf8; flex-shrink: 0; }
-  .options label.correct { background: #14532d; border-color: #22c55e; color: #86efac; }
-  .options label.wrong { background: #450a0a; border-color: #ef4444; color: #fca5a5; }
-  .options label.reveal { background: #14532d; border-color: #22c55e; color: #86efac; }
-  .feedback { font-size: 0.85rem; margin-top: 0.5rem; padding: 0.5rem 0.8rem; border-radius: 6px; }
-  .feedback.correct-msg { background: #14532d; color: #86efac; }
-  .feedback.wrong-msg { background: #450a0a; color: #fca5a5; }
-  .score-display { text-align: center; background: #1e293b; border-radius: 16px; padding: 2rem; margin-bottom: 2rem; border: 1px solid #334155; }
-  .score-display .num { font-size: 3rem; font-weight: 700; color: #38bdf8; }
-  .score-display p { color: #94a3b8; margin-top: 0.5rem; }
-  .btn { display: block; margin: 2rem auto 0; background: #0284c7; color: white; border: none; padding: 0.9rem 2.5rem; border-radius: 10px; font-size: 1rem; cursor: pointer; transition: background 0.2s; }
-  .btn:hover { background: #0369a1; }
-  .btn-reset { background: #475569; margin-top: 1rem; }
-  .btn-reset:hover { background: #334155; }
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Segoe UI', sans-serif; background: #0f172a; color: #e2e8f0; min-height: 100vh; }
 
-  /* JUMPSCARE */
-  #sasha { display: none; position: fixed; inset: 0; background: #000; z-index: 9999; cursor: pointer; justify-content: center; align-items: center; flex-direction: column; }
-  #sasha.active { display: flex; }
-  #sasha-clown { font-size: 30vw; line-height: 1; animation: clownshake 0.08s infinite; filter: drop-shadow(0 0 30px #ff0000); }
-  #sasha-text { font-size: 20vw; font-weight: 900; color: #ef4444; text-shadow: 0 0 40px #ef4444, 0 0 80px #ff0000; letter-spacing: -0.02em; animation: sashapulse 0.15s infinite alternate; user-select: none; }
-  #sasha-sub { color: #fca5a5; font-size: 1.5rem; margin-top: 1rem; animation: sashapulse 0.2s infinite alternate; }
-  @keyframes sashapulse { from { transform: scale(1); } to { transform: scale(1.04); } }
-  @keyframes clownshake { 0%{transform:translate(-4px,-3px) rotate(-2deg);} 25%{transform:translate(4px,3px) rotate(2deg);} 50%{transform:translate(-3px,4px) rotate(-1deg);} 75%{transform:translate(3px,-4px) rotate(1deg);} 100%{transform:translate(-4px,2px) rotate(-2deg);} }
+/* TABS */
+.tab-bar { display: flex; background: #0f172a; border-bottom: 2px solid #1e293b; position: sticky; top: 0; z-index: 100; }
+.tab-btn { flex: 1; padding: 1rem 0.5rem; background: none; border: none; color: #64748b; font-size: 0.8rem; font-weight: 600; cursor: pointer; transition: color 0.2s, border-bottom 0.2s; border-bottom: 3px solid transparent; margin-bottom: -2px; text-transform: uppercase; letter-spacing: 0.04em; }
+.tab-btn:hover { color: #94a3b8; }
+.tab-btn.active { color: #38bdf8; border-bottom-color: #38bdf8; }
+.tab-panel { display: none; padding: 2rem 1rem; max-width: 900px; margin: 0 auto; }
+.tab-panel.active { display: block; }
 
-  @media (max-width: 600px) { h1 { font-size: 1.4rem; } }
+/* SHARED */
+h1 { font-size: 1.6rem; color: #38bdf8; margin-bottom: 0.3rem; }
+.page-sub { color: #64748b; font-size: 0.85rem; margin-bottom: 2rem; }
+.section-title { font-size: 1.1rem; color: #7dd3fc; border-left: 4px solid #38bdf8; padding-left: 0.8rem; margin: 2rem 0 1rem; }
 
-  /* FLIP CARDS */
-  h2.open-title { font-size: 1.4rem; color: #f472b6; text-align: center; margin: 3rem 0 0.4rem; }
-  .open-subtitle { text-align: center; color: #94a3b8; font-size: 0.85rem; margin-bottom: 1.5rem; }
-  .flip-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1rem; }
-  .flip-wrap { perspective: 1000px; height: 180px; cursor: pointer; }
-  .flip-inner { position: relative; width: 100%; height: 100%; transform-style: preserve-3d; transition: transform 0.55s cubic-bezier(.4,0,.2,1); }
-  .flip-wrap.flipped .flip-inner { transform: rotateY(180deg); }
-  .flip-front, .flip-back { position: absolute; inset: 0; border-radius: 14px; padding: 1.2rem 1.4rem; backface-visibility: hidden; -webkit-backface-visibility: hidden; display: flex; flex-direction: column; justify-content: center; }
-  .flip-front { background: #1e293b; border: 1px solid #334155; }
-  .flip-front .card-num { font-size: 0.75rem; color: #64748b; margin-bottom: 0.5rem; }
-  .flip-front .card-q { font-weight: 500; line-height: 1.4; color: #e2e8f0; }
-  .flip-front .card-hint { font-size: 0.75rem; color: #475569; margin-top: auto; padding-top: 0.8rem; }
-  .flip-back { background: #0f3460; border: 1px solid #6366f1; transform: rotateY(180deg); }
-  .flip-back .card-a { font-size: 0.9rem; line-height: 1.5; color: #c7d2fe; }
-  .flip-back .card-label { font-size: 0.7rem; color: #818cf8; margin-bottom: 0.4rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; }
+/* ===== TAB 1 — PLAN ===== */
+.plan-lab { background: #1e293b; border-radius: 14px; padding: 1.5rem; margin-bottom: 1.5rem; border: 1px solid #334155; }
+.plan-lab h3 { font-size: 1rem; color: #f472b6; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem; }
+.plan-lab ul { list-style: none; }
+.plan-lab ul li { padding: 0.4rem 0; border-bottom: 1px solid #1e3a5f22; color: #cbd5e1; font-size: 0.9rem; display: flex; gap: 0.5rem; align-items: flex-start; }
+.plan-lab ul li::before { content: "→"; color: #38bdf8; flex-shrink: 0; margin-top: 1px; }
+.plan-lab .reactions { background: #0f172a; border-radius: 8px; padding: 0.8rem 1rem; margin-top: 1rem; font-family: monospace; font-size: 0.85rem; color: #86efac; line-height: 1.8; }
+.key-box { background: #1e293b; border: 1px solid #334155; border-radius: 10px; padding: 1rem 1.2rem; margin-top: 1rem; }
+.key-box h4 { color: #fbbf24; font-size: 0.85rem; margin-bottom: 0.6rem; }
+.key-box table { width: 100%; font-size: 0.82rem; border-collapse: collapse; }
+.key-box td, .key-box th { padding: 0.35rem 0.5rem; border: 1px solid #334155; }
+.key-box th { background: #0f172a; color: #7dd3fc; }
+.key-box td:first-child { color: #f472b6; font-weight: 600; }
+.badge { display: inline-block; background: #0369a1; color: #bae6fd; font-size: 0.7rem; padding: 0.15rem 0.5rem; border-radius: 999px; margin-left: 0.4rem; }
+
+/* ===== TAB 2 — FICHE ===== */
+.fiche-section { background: #1e293b; border-radius: 14px; padding: 1.5rem; margin-bottom: 1.5rem; border: 1px solid #334155; }
+.fiche-section h3 { color: #f472b6; margin-bottom: 1rem; font-size: 1rem; }
+.fiche-section p, .fiche-section li { font-size: 0.88rem; line-height: 1.7; color: #cbd5e1; }
+.fiche-section ul { padding-left: 1.2rem; }
+.fiche-section ul li { margin-bottom: 0.25rem; }
+.fiche-section .highlight { color: #fbbf24; font-weight: 600; }
+.fiche-section .formula { font-family: monospace; background: #0f172a; padding: 0.6rem 1rem; border-radius: 8px; margin: 0.6rem 0; font-size: 0.85rem; color: #86efac; display: block; }
+.fiche-section table { width: 100%; font-size: 0.82rem; border-collapse: collapse; margin-top: 0.5rem; }
+.fiche-section td, .fiche-section th { padding: 0.35rem 0.6rem; border: 1px solid #334155; }
+.fiche-section th { background: #0f172a; color: #7dd3fc; }
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+@media(max-width:600px){ .two-col { grid-template-columns: 1fr; } }
+
+/* ===== TABS 3 & 4 — QUIZ ===== */
+.score-display { text-align: center; background: #1e293b; border-radius: 14px; padding: 1.2rem; margin-bottom: 1.5rem; border: 1px solid #334155; }
+.score-display .num { font-size: 2.5rem; font-weight: 700; color: #38bdf8; }
+.score-display p { color: #94a3b8; margin-top: 0.3rem; font-size: 0.85rem; }
+.progress-bar { background: #1e293b; border-radius: 8px; height: 7px; margin-bottom: 1.5rem; }
+.progress-fill { background: #38bdf8; height: 7px; border-radius: 8px; transition: width 0.3s; }
+.question { background: #1e293b; border-radius: 12px; padding: 1.4rem; margin-bottom: 1rem; border: 1px solid #334155; }
+.question p { font-weight: 500; margin-bottom: 0.9rem; line-height: 1.5; font-size: 0.92rem; }
+.options label { display: flex; align-items: flex-start; gap: 0.5rem; padding: 0.55rem 0.75rem; border-radius: 8px; cursor: pointer; transition: background 0.15s; margin-bottom: 0.35rem; border: 1px solid transparent; font-size: 0.88rem; }
+.options label:hover { background: #334155; }
+.options input[type="radio"] { margin-top: 3px; accent-color: #38bdf8; flex-shrink: 0; }
+.options label.correct { background: #14532d; border-color: #22c55e; color: #86efac; }
+.options label.wrong { background: #450a0a; border-color: #ef4444; color: #fca5a5; }
+.options label.reveal { background: #14532d; border-color: #22c55e; color: #86efac; }
+.feedback { font-size: 0.82rem; margin-top: 0.4rem; padding: 0.45rem 0.7rem; border-radius: 6px; }
+.feedback.correct-msg { background: #14532d; color: #86efac; }
+.feedback.wrong-msg { background: #450a0a; color: #fca5a5; }
+.btn { display: inline-block; background: #0284c7; color: white; border: none; padding: 0.8rem 2rem; border-radius: 10px; font-size: 0.95rem; cursor: pointer; transition: background 0.2s; margin: 1rem 0.4rem 0 0; }
+.btn:hover { background: #0369a1; }
+.btn-reset { background: #475569; }
+.btn-reset:hover { background: #334155; }
+
+/* FLIP CARDS */
+.flip-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(270px, 1fr)); gap: 1rem; }
+.flip-section-sep { grid-column: 1/-1; font-size: 0.82rem; color: #7dd3fc; border-left: 3px solid #38bdf8; padding-left: 0.6rem; margin-top: 0.5rem; }
+.flip-wrap { perspective: 1000px; height: 190px; cursor: pointer; }
+.flip-inner { position: relative; width: 100%; height: 100%; transform-style: preserve-3d; transition: transform 0.55s cubic-bezier(.4,0,.2,1); }
+.flip-wrap.flipped .flip-inner { transform: rotateY(180deg); }
+.flip-front, .flip-back { position: absolute; inset: 0; border-radius: 14px; padding: 1.1rem 1.3rem; backface-visibility: hidden; -webkit-backface-visibility: hidden; display: flex; flex-direction: column; justify-content: center; }
+.flip-front { background: #1e293b; border: 1px solid #334155; }
+.flip-front .card-num { font-size: 0.7rem; color: #64748b; margin-bottom: 0.4rem; }
+.flip-front .card-q { font-weight: 500; line-height: 1.4; color: #e2e8f0; font-size: 0.88rem; }
+.flip-front .card-hint { font-size: 0.7rem; color: #475569; margin-top: auto; padding-top: 0.6rem; }
+.flip-back { background: #0f3460; border: 1px solid #6366f1; transform: rotateY(180deg); overflow-y: auto; }
+.flip-back .card-a { font-size: 0.82rem; line-height: 1.5; color: #c7d2fe; }
+.flip-back .card-label { font-size: 0.68rem; color: #818cf8; margin-bottom: 0.3rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; }
+
+/* JUMPSCARE */
+#sasha { display: none; position: fixed; inset: 0; background: #000; z-index: 9999; cursor: pointer; justify-content: center; align-items: center; flex-direction: column; }
+#sasha.active { display: flex; }
+#sasha-clown { font-size: 28vw; line-height: 1; animation: clownshake 0.08s infinite; filter: drop-shadow(0 0 30px #ff0000); }
+#sasha-text { font-size: 18vw; font-weight: 900; color: #ef4444; text-shadow: 0 0 40px #ef4444, 0 0 80px #ff0000; letter-spacing: -0.02em; animation: sashapulse 0.15s infinite alternate; user-select: none; }
+#sasha-sub { color: #fca5a5; font-size: 1.3rem; margin-top: 1rem; animation: sashapulse 0.2s infinite alternate; }
+@keyframes sashapulse { from { transform: scale(1); } to { transform: scale(1.05); } }
+@keyframes clownshake { 0%{transform:translate(-4px,-3px) rotate(-2deg);} 25%{transform:translate(4px,3px) rotate(2deg);} 50%{transform:translate(-3px,4px) rotate(-1deg);} 75%{transform:translate(3px,-4px) rotate(1deg);} 100%{transform:translate(-4px,2px) rotate(-2deg);} }
 </style>
 </head>
 <body>
 
-<h1>⚗️ Quiz — Test de Labo Chimie</h1>
-<p class="subtitle">5% de la note finale · ~20 questions affichées · Cliquer pour révéler les réponses</p>
-
-<div class="score-display">
-  <div class="num" id="score-num">0 / 0</div>
-  <p id="score-msg">Réponds aux questions pour voir ton score</p>
+<div class="tab-bar">
+  <button class="tab-btn active" onclick="switchTab('plan', this)">📋 Plan</button>
+  <button class="tab-btn" onclick="switchTab('fiche', this)">📖 Fiche</button>
+  <button class="tab-btn" onclick="switchTab('qcm', this)">✅ Choix multiples</button>
+  <button class="tab-btn" onclick="switchTab('dev', this)">✏️ Développement</button>
 </div>
 
-<div class="progress-bar"><div class="progress-fill" id="progress" style="width:0%"></div></div>
+<!-- ===== TAB 1 — PLAN DE RÉVISION ===== -->
+<div id="tab-plan" class="tab-panel active">
+  <h1>📋 Plan de révision</h1>
+  <p class="page-sub">Test théorique — 5% de la note finale · 20 minutes · 5 laboratoires</p>
 
-<div id="quiz"></div>
+  <div class="plan-lab">
+    <h3>🔬 Lab 1 — Chromatographie sur couche mince (CCM)</h3>
+    <ul>
+      <li>Principe : séparation par adsorption sélective entre phase stationnaire (silice polaire) et phase mobile (acétate d'éthyle)</li>
+      <li>Rf = distance composé / distance front solvant · constante entre 0 et 1</li>
+      <li>Plus un composé est polaire → Rf plus faible (adsorbé plus fort sur silice)</li>
+      <li>Révélation : lampe UV (aromatiques) + chambre à iode (insaturés)</li>
+      <li>Marquer la plaque au <strong>crayon</strong>, ne jamais toucher la silice avec les doigts</li>
+      <li>Saturer la cuve 2-3 min avant d'insérer la plaque</li>
+      <li>Identifier médicament inconnu par comparaison des Rf avec composés purs</li>
+    </ul>
+    <div class="key-box">
+      <h4>Médicaments et composition</h4>
+      <table>
+        <tr><th>Médicament</th><th>Composants</th></tr>
+        <tr><td>Anacine</td><td>Acide acétylsalicylique + Caféine</td></tr>
+        <tr><td>Empirine</td><td>Phénacétine + Ac. acétylsalicylique + Caféine</td></tr>
+        <tr><td>Exédrine</td><td>Acétaminophène + Ac. acétylsalicylique + Caféine + Salicylamide</td></tr>
+        <tr><td>Vanquish</td><td>Ac. acétylsalicylique + Acétaminophène + Caféine</td></tr>
+        <tr><td>Tylénol</td><td>Acétaminophène seulement</td></tr>
+      </table>
+    </div>
+  </div>
 
-<button class="btn" onclick="checkAll()">Corriger tout</button>
-<button class="btn btn-reset" onclick="resetQuiz()">Recommencer</button>
+  <div class="plan-lab">
+    <h3>🧬 Lab 2 — Structures moléculaires et isomérie</h3>
+    <ul>
+      <li>DI = (2n + 2 − m + x) / 2 · O ne change pas le DI · DI=4 → benzène</li>
+      <li>sp³ → tétraédrique 109,5° · sp² → triangulaire plane 120° · sp → linéaire 180°</li>
+      <li>Isomères de position : même groupe fonctionnel, position différente</li>
+      <li>Isomères de fonction : même formule, groupe fonctionnel différent</li>
+      <li>Stéréoisomérie géométrique (cis/trans, E/Z) : sur double liaison C=C</li>
+      <li>Stéréoisomérie optique (R/S) : carbone sp³ avec 4 substituants différents</li>
+      <li>C₅H₁₂ → 3 isomères : n-pentane, 2-méthylbutane, 2,2-diméthylpropane</li>
+      <li>Projection de Newman : vue le long d'une liaison C-C · décalée = stable · éclipsée = instable</li>
+      <li>Conventions de Cram : trait plein (plan) · triangle plein (avant) · triangle hachuré (arrière)</li>
+    </ul>
+  </div>
 
-<h2 class="open-title">✏️ Questions à réponse ouverte</h2>
-<p class="open-subtitle">Réfléchis à ta réponse, puis clique la carte pour voir la correction</p>
-<div class="flip-grid" id="flip-quiz"></div>
+  <div class="plan-lab">
+    <h3>🍌 Labs 3 & 4 — Estérification (acétate d'isoamyle)</h3>
+    <ul>
+      <li>Fischer : acide carboxylique + alcool ⇌ ester + eau (H₂SO₄, Δ) — réversible</li>
+      <li>Excès d'acide acétique → déplace équilibre vers produit (Le Chatelier)</li>
+      <li>Semaine 1 : reflux 30 min à 90°C → condenseur vertical renvoie vapeurs au ballon</li>
+      <li>Lavages : eau glacée (élim. acide + alcool) → eau distillée → NaHCO₃ 5% (neutralise acide) → MgSO₄ anhydre (sèche)</li>
+      <li>Semaine 2 : distillation simple · plateau ≈ 142°C · pierres ponce contre bumping</li>
+      <li>Rendement = (masse obtenue / masse attendue) × 100%</li>
+      <li>IR : C=O ester ≈ 1735 cm⁻¹ · C-O : 1000-1300 cm⁻¹ · absence O-H large confirme conversion</li>
+    </ul>
+    <div class="reactions">
+CH₃COOH + (CH₃)₂CHCH₂CH₂OH ⇌ CH₃COOCH₂CH₂CH(CH₃)₂ + H₂O
+                               H₂SO₄, Δ</div>
+    <div class="key-box">
+      <h4>Données physiques clés</h4>
+      <table>
+        <tr><th>Composé</th><th>Densité (g/mL)</th><th>Éb. (°C)</th></tr>
+        <tr><td>Acide acétique</td><td>1,0446</td><td>117,9</td></tr>
+        <tr><td>3-méthylbutan-1-ol</td><td>0,8104</td><td>130,5</td></tr>
+        <tr><td>Acétate d'isoamyle</td><td>0,876</td><td>142</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <div class="plan-lab">
+    <h3>🧼 Lab 5 — Saponification</h3>
+    <ul>
+      <li>Hydrolyse basique d'un triglycéride (ester) par NaOH → glycérol + savon (RCOO⁻Na⁺)</li>
+      <li>Réaction non réversible (base forte déplace totalement l'équilibre)</li>
+      <li>Triglycéride = triester du glycérol + 3 acides gras</li>
+      <li>Savon = amphiphile : tête hydrophile COO⁻Na⁺ + queue hydrophobe (alkyle)</li>
+      <li>Eau dure : Ca²⁺/Mg²⁺ précipitent le savon → inefficace · 2 RCOONa + CaCl₂ → (RCOO)₂Ca↓ + 2 NaCl</li>
+      <li>Protocole : huile coco (~12g) + olive (~38g) + NaOH (7g dans 17mL H₂O) · chauffer 50-60°C · agiter jusqu'à trace · pH · cure 2 semaines</li>
+      <li>Acides gras : palmitique (saturé), stéarique (saturé), oléique (1 insaturation), arachidonique (polyinsaturé)</li>
+    </ul>
+    <div class="reactions">
+Triglycéride + 3 NaOH → Glycérol + 3 RCOO⁻Na⁺ (savon)
+2 RCOONa + CaCl₂ → (RCOO)₂Ca↓ + 2 NaCl</div>
+  </div>
+
+  <div class="key-box" style="margin-top:0">
+    <h4>⚠️ Termes clés à maîtriser</h4>
+    <table>
+      <tr><th>Terme</th><th>Définition courte</th></tr>
+      <tr><td>Adsorption</td><td>Fixation d'une molécule sur une surface solide</td></tr>
+      <tr><td>Élution</td><td>Migration du solvant entraînant les composés en CCM</td></tr>
+      <tr><td>Reflux</td><td>Condensation et retour des vapeurs dans le ballon</td></tr>
+      <tr><td>Décantation</td><td>Séparation de deux liquides non miscibles par densité</td></tr>
+      <tr><td>Agent desséchant</td><td>MgSO₄ anhydre — absorbe l'eau résiduelle</td></tr>
+      <tr><td>DI</td><td>Nombre de doubles liaisons + cycles dans une molécule</td></tr>
+      <tr><td>Rendement</td><td>(masse obtenue / masse attendue) × 100%</td></tr>
+    </table>
+  </div>
+</div>
+
+<!-- ===== TAB 2 — FICHE DE RÉVISION ===== -->
+<div id="tab-fiche" class="tab-panel">
+  <h1>📖 Fiche de révision</h1>
+  <p class="page-sub">Résumé dense de toute la matière — idéal pour dernière révision</p>
+
+  <div class="fiche-section">
+    <h3>🔬 Lab 1 — CCM</h3>
+    <p><span class="highlight">Principe :</span> séparation par adsorption sélective. Phase stationnaire = silice (polaire). Phase mobile = acétate d'éthyle (migre par capillarité).</p>
+    <code class="formula">Rf = distance parcourue par le composé ÷ distance parcourue par le front du solvant</code>
+    <ul>
+      <li>Rf = constante physique, toujours entre 0 et 1</li>
+      <li>Composé polaire → forte adsorption sur silice → faible Rf</li>
+      <li>Lampe UV : révèle composés <span class="highlight">aromatiques</span> (taches sombres)</li>
+      <li>Chambre à iode : révèle composés <span class="highlight">insaturés</span> (taches brunes)</li>
+      <li>Plaque : crayon (pas stylo), tache ≤ 2 mm, 2 applications, ne pas toucher silice</li>
+      <li>Saturer cuve 2-3 min, ne pas bouger pendant élution, marquer front au crayon</li>
+    </ul>
+    <table>
+      <tr><th>Médicament</th><th>Composition</th></tr>
+      <tr><td>Anacine</td><td>Acide acétylsalicylique + Caféine</td></tr>
+      <tr><td>Empirine</td><td>Phénacétine + Ac. acétylsalicylique + Caféine</td></tr>
+      <tr><td>Exédrine</td><td>Acétaminophène + Ac. acétylsalicylique + Caféine + Salicylamide</td></tr>
+      <tr><td>Vanquish</td><td>Ac. acétylsalicylique + Acétaminophène + Caféine</td></tr>
+      <tr><td>Tylénol</td><td>Acétaminophène seulement</td></tr>
+    </table>
+  </div>
+
+  <div class="fiche-section">
+    <h3>🧬 Lab 2 — Structures et isomérie</h3>
+    <code class="formula">DI = (2n + 2 − m + x) / 2 &nbsp;&nbsp; (O n'affecte pas le DI)</code>
+    <div class="two-col">
+      <div>
+        <table>
+          <tr><th>Hybridation</th><th>Géométrie</th><th>Angle</th></tr>
+          <tr><td>sp³</td><td>Tétraédrique</td><td>109,5°</td></tr>
+          <tr><td>sp²</td><td>Triangulaire plane</td><td>120°</td></tr>
+          <tr><td>sp</td><td>Linéaire</td><td>180°</td></tr>
+        </table>
+      </div>
+      <div>
+        <ul>
+          <li>DI=0 → saturé · DI=1 → 1 double ou 1 cycle</li>
+          <li>DI=2 → 1 triple OU 2 doubles OU 2 cycles</li>
+          <li>DI=4 → noyau benzénique</li>
+          <li>C₅H₁₂ → <span class="highlight">3 isomères</span></li>
+        </ul>
+      </div>
+    </div>
+    <p style="margin-top:0.8rem"><span class="highlight">Isomères de position</span> : même groupe fonctionnel, endroit différent · <span class="highlight">Isomères de fonction</span> : groupe fonctionnel différent</p>
+    <p style="margin-top:0.4rem"><span class="highlight">Cis/trans</span> : sur C=C avec 2 substituants différents par carbone · <span class="highlight">R/S</span> : carbone chiral sp³ (4 substituants différents)</p>
+    <p style="margin-top:0.4rem"><span class="highlight">Newman</span> : vue le long d'un lien C-C · Décalée = stable · Éclipsée = instable</p>
+    <p style="margin-top:0.4rem"><span class="highlight">Cram</span> : trait plein = plan · triangle plein = avant · triangle hachuré = arrière</p>
+  </div>
+
+  <div class="fiche-section">
+    <h3>🍌 Labs 3 & 4 — Estérification de Fischer</h3>
+    <code class="formula">RCOOH + R'OH ⇌ RCOOR' + H₂O &nbsp;&nbsp;&nbsp; (H₂SO₄, Δ — réversible)</code>
+    <code class="formula">CH₃COOH + (CH₃)₂CHCH₂CH₂OH ⇌ CH₃COOCH₂CH₂CH(CH₃)₂ + H₂O</code>
+    <ul>
+      <li><span class="highlight">Excès acide acétique</span> → Le Chatelier → déplace équilibre vers l'ester</li>
+      <li><span class="highlight">Reflux</span> : condenseur vertical recondense vapeurs → réaction sans perte, 90°C, 30 min</li>
+      <li>Lavages (ampoule décanter) : eau glacée → eau distillée → NaHCO₃ 5% (CO₂ dégagé) → MgSO₄ anhydre</li>
+      <li>Phase aqueuse (plus dense) = en bas · phase organique = en haut</li>
+      <li><span class="highlight">Distillation</span> : plateau ≈ 142°C · pierres ponce · ne pas assécher le ballon</li>
+      <li>IR ester : C=O ≈ 1735 cm⁻¹ · C-O : 1000-1300 cm⁻¹ · pas de pic O-H large</li>
+    </ul>
+    <code class="formula">Rendement = (masse obtenue / masse attendue) × 100%</code>
+  </div>
+
+  <div class="fiche-section">
+    <h3>🧼 Lab 5 — Saponification</h3>
+    <code class="formula">Triglycéride + 3 NaOH → Glycérol + 3 RCOO⁻Na⁺</code>
+    <code class="formula">2 RCOONa + CaCl₂ → (RCOO)₂Ca↓ + 2 NaCl &nbsp;&nbsp; (eau dure)</code>
+    <ul>
+      <li>Réaction <span class="highlight">non réversible</span> (NaOH fort déplace totalement)</li>
+      <li>Triglycéride = triester du glycérol avec 3 acides gras</li>
+      <li>Savon : tête hydrophile (COO⁻Na⁺) + queue hydrophobe → amphiphile → micelles</li>
+      <li>Acides gras saturés : palmitique (C15), stéarique (C17) · insaturés : oléique (1π), arachidonique (pluri π)</li>
+      <li>Eau dure : Ca²⁺/Mg²⁺ → précipité insoluble → savon inefficace</li>
+      <li>Trace = émulsion qui s'épaissit, signe d'avancement de la saponification</li>
+      <li>Protocole : ~12g coco + ~38g olive · NaOH (7g / 17mL) · 50-60°C · 30-45 min · cure 2 semaines</li>
+    </ul>
+  </div>
+</div>
+
+<!-- ===== TAB 3 — QCM ===== -->
+<div id="tab-qcm" class="tab-panel">
+  <h1>✅ Questions à choix multiples</h1>
+  <p class="page-sub">44 questions · Cliquer sur une réponse pour la valider</p>
+  <div class="score-display">
+    <div class="num" id="qcm-score-num">0 / 0</div>
+    <p id="qcm-score-msg">Réponds aux questions pour voir ton score</p>
+  </div>
+  <div class="progress-bar"><div class="progress-fill" id="qcm-progress" style="width:0%"></div></div>
+  <div id="qcm-quiz"></div>
+  <button class="btn" onclick="checkAll()">Corriger tout</button>
+  <button class="btn btn-reset" onclick="resetQcm()">Recommencer</button>
+</div>
+
+<!-- ===== TAB 4 — DÉVELOPPEMENT ===== -->
+<div id="tab-dev" class="tab-panel">
+  <h1>✏️ Questions à développement</h1>
+  <p class="page-sub">Réfléchis à ta réponse · clique la carte pour la retourner</p>
+  <div class="flip-grid" id="flip-quiz"></div>
+</div>
 
 <!-- JUMPSCARE -->
 <div id="sasha" onclick="dismissSasha()">
@@ -88,79 +320,86 @@
 </div>
 
 <script>
+// ===== TABS =====
+function switchTab(name, btn) {
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab-' + name).classList.add('active');
+  btn.classList.add('active');
+}
+
+// ===== QCM =====
 const questions = [
-  // === LAB 1 — CCM ===
-  { section: "🔬 Lab 1 — Chromatographie (CCM)", q: "Que signifie l'acronyme CCM ?", opts: ["Chromatographie sur Couche Mince","Colonne Chromatographique Modulaire","Cristallisation par Condensation Mobile","Courant Chimique Mixte"], ans: 0 },
-  { q: "Quelle est la formule du facteur de rétention Rf ?", opts: ["Distance parcourue par le composé / Distance parcourue par le front du solvant","Distance du front / Distance du composé","Masse du composé / Volume du solvant","Hauteur de la tache / Largeur de la plaque"], ans: 0 },
-  { q: "Quelle est la phase stationnaire utilisée en CCM dans ce labo ?", opts: ["Gel de silice","Charbon actif","Alumine","Cellulose"], ans: 0 },
-  { q: "Quel solvant est utilisé comme phase mobile dans ce labo de CCM ?", opts: ["Acétate d'éthyle","Eau distillée","Éthanol","Hexane"], ans: 0 },
-  { q: "Pourquoi doit-on marquer la plaque CCM au crayon et non au stylo ?", opts: ["L'encre du stylo migrerait avec le solvant et fausserait les résultats","Le crayon adhère mieux à la silice","L'encre est toxique avec les réactifs","Pour des raisons esthétiques seulement"], ans: 0 },
-  { q: "Quelle méthode détecte les composés aromatiques sur la plaque CCM ?", opts: ["Lampe UV","Chambre à iode","Réactif de Molisch","Flamme"], ans: 0 },
+  // Lab 1
+  { section: "🔬 Lab 1 — CCM", q: "Que signifie CCM ?", opts: ["Chromatographie sur Couche Mince","Colonne Chromatographique Modulaire","Cristallisation par Condensation Mobile","Courant Chimique Mixte"], ans: 0 },
+  { q: "Formule du facteur de rétention Rf ?", opts: ["Distance composé / Distance front solvant","Distance front / Distance composé","Masse composé / Volume solvant","Vitesse composé / Vitesse solvant"], ans: 0 },
+  { q: "Phase stationnaire en CCM dans ce labo ?", opts: ["Gel de silice (polaire)","Charbon actif","Alumine","Cellulose"], ans: 0 },
+  { q: "Phase mobile utilisée dans ce labo de CCM ?", opts: ["Acétate d'éthyle","Eau distillée","Éthanol","Hexane"], ans: 0 },
+  { q: "Pourquoi marquer la plaque au crayon et NON au stylo ?", opts: ["L'encre migrerait avec le solvant et fausserait les résultats","Le crayon adhère mieux à la silice","L'encre réagit avec la silice","Pour des raisons de sécurité"], ans: 0 },
+  { q: "Quelle méthode révèle les composés AROMATIQUES sur la plaque ?", opts: ["Lampe UV","Chambre à iode","Réactif de Molisch","Flamme"], ans: 0 },
+  { q: "Quelle méthode révèle les composés INSATURÉS sur la plaque ?", opts: ["Chambre à iode","Lampe UV","Eau bromée","Hydroxyde de sodium"], ans: 0 },
   { q: "Quel médicament contient UNIQUEMENT de l'acétaminophène ?", opts: ["Tylénol","Anacine","Exédrine","Empirine"], ans: 0 },
-  { q: "Quel médicament contient acide acétylsalicylique + caféine SEULEMENT ?", opts: ["Anacine","Vanquish","Exédrine","Tylénol"], ans: 0 },
-  { q: "Quel est l'intervalle de valeurs possibles pour Rf ?", opts: ["0 à 1","−1 à 1","0 à 100","1 à 10"], ans: 0 },
-  { q: "Pourquoi faut-il éviter de toucher la silice avec les doigts ?", opts: ["Les huiles de la peau contaminent la plaque et créent des taches parasites","La silice est trop fragile","Pour éviter une réaction chimique","La chaleur des doigts fait fondre la silice"], ans: 0 },
-  { q: "Lors de l'élution, pourquoi doit-on attendre 2-3 minutes avant d'insérer la plaque dans la cuve ?", opts: ["Pour saturer l'atmosphère de la cuve en vapeurs de solvant","Pour refroidir le solvant","Pour que la silice se fixe mieux","Pour évaporer l'excès d'eau"], ans: 0 },
-  { q: "Un composé très polaire sur gel de silice (phase stationnaire polaire) aura un Rf :", opts: ["Faible (proche de 0)","Élevé (proche de 1)","Égal à 1","Négatif"], ans: 0 },
+  { q: "Quel médicament contient acide acétylsalicylique + caféine seulement ?", opts: ["Anacine","Vanquish","Exédrine","Tylénol"], ans: 0 },
+  { q: "Quel médicament contient 4 composants (le plus complexe) ?", opts: ["Exédrine","Empirine","Vanquish","Anacine"], ans: 0 },
+  { q: "Pourquoi saturer la cuve 2-3 min avant d'insérer la plaque ?", opts: ["Saturer l'atmosphère en vapeurs de solvant pour un front régulier","Refroidir le solvant","Évaporer l'excès d'eau dans la cuve","Permettre à la silice de s'humidifier"], ans: 0 },
+  { q: "Un composé très polaire sur gel de silice aura un Rf :", opts: ["Faible (proche de 0)","Élevé (proche de 1)","Égal à 1","Supérieur à 1"], ans: 0 },
 
-  // === LAB 2 — MODÈLES MOLÉCULAIRES ===
-  { section: "🧪 Lab 2 — Modèles moléculaires & Isomérie", q: "Quelle est la formule du degré d'insaturation (DI) pour CₙHₘNₓOₚ ?", opts: ["DI = (2n + 2 − m + x) / 2","DI = (2n − m + 2) / 2","DI = n − m + 2","DI = (m − 2n + 2) / 2"], ans: 0 },
-  { q: "Quelle hybridation possède un carbone d'une double liaison C=C ?", opts: ["sp²","sp³","sp","sp⁴"], ans: 0 },
-  { q: "Combien d'isomères de structure possède C₅H₁₂ ?", opts: ["3","2","4","5"], ans: 0 },
-  { q: "Lequel de ces isomères de C₅H₁₂ est le 2,2-diméthylpropane ?", opts: ["Un carbone central lié à 4 méthyles","Une chaîne droite de 5 carbones","Une chaîne de 4 carbones avec un méthyle en position 2","Aucune de ces réponses"], ans: 0 },
-  { q: "Les isomères cis-trans sont un type d'isomérie :", opts: ["Stéréoisomérie géométrique","Isomérie de position","Isomérie fonctionnelle","Isomérie optique"], ans: 0 },
-  { q: "Une conformation décalée (staggered) est-elle plus ou moins stable qu'une conformation éclipsée ?", opts: ["Plus stable","Moins stable","Également stable","Cela dépend de la température"], ans: 0 },
-  { q: "La projection de Newman représente :", opts: ["Une vue le long d'une liaison C−C","La structure développée d'un composé","Les charges partielles d'une molécule","La rotation autour d'une liaison π"], ans: 0 },
-  { q: "Le DI d'un alcyne (triple liaison) est :", opts: ["2","1","3","0"], ans: 0 },
-  { q: "Quel type d'isomérie concerne des composés de même formule moléculaire mais de groupements fonctionnels différents ?", opts: ["Isomérie fonctionnelle","Isomérie de position","Stéréoisomérie","Isomérie conformationnelle"], ans: 0 },
-  { q: "Un carbone sp³ a une géométrie :", opts: ["Tétraédrique","Trigonale plane","Linéaire","Pyramidale à base carrée"], ans: 0 },
+  // Lab 2
+  { section: "🧬 Lab 2 — Structures et isomérie", q: "DI de C₅H₈ ?", opts: ["2","1","3","0"], ans: 0 },
+  { q: "Hybridation d'un carbone de double liaison C=C ?", opts: ["sp²","sp³","sp","sp⁴"], ans: 0 },
+  { q: "Géométrie d'un carbone sp³ ?", opts: ["Tétraédrique (109,5°)","Triangulaire plane (120°)","Linéaire (180°)","Pyramidale à base carrée"], ans: 0 },
+  { q: "Combien d'isomères de structure pour C₅H₁₂ ?", opts: ["3","2","4","5"], ans: 0 },
+  { q: "L'oxygène dans une formule moléculaire change-t-il le DI ?", opts: ["Non, l'oxygène ne change pas le DI","Oui, chaque O ajoute 1 au DI","Oui, chaque O retire 1 au DI","Cela dépend du groupe fonctionnel"], ans: 0 },
+  { q: "DI du benzène C₆H₆ ?", opts: ["4","3","6","2"], ans: 0 },
+  { q: "L'isomérie cis/trans est possible sur :", opts: ["Une double liaison C=C avec substituants différents","Un alcane quelconque","Un carbone sp³ avec 4 substituants identiques","Une liaison simple C-C"], ans: 0 },
+  { q: "Conformation DÉCALÉE vs ÉCLIPSÉE : laquelle est la plus stable ?", opts: ["Décalée (staggered)","Éclipsée (eclipsed)","Elles sont équivalentes","Cela dépend de la température"], ans: 0 },
+  { q: "La projection de Newman représente :", opts: ["Vue le long d'une liaison C-C","Structure développée dans le plan","Charges partielles de la molécule","Vue de dessus d'un cycle"], ans: 0 },
+  { q: "Isomères de FONCTION : même formule moléculaire mais :", opts: ["Groupes fonctionnels différents","Même groupe fonctionnel, position différente","Arrangements spatiaux différents","Masses molaires différentes"], ans: 0 },
+  { q: "Triangle plein (▶) dans la convention de Cram signifie :", opts: ["Liaison vers l'avant du plan (vers le lecteur)","Liaison vers l'arrière du plan","Liaison dans le plan","Liaison ionique"], ans: 0 },
 
-  // === LABS 3 & 4 — ESTÉRIFICATION ===
-  { section: "🍌 Labs 3 & 4 — Estérification (Huile de banane)", q: "Quels sont les deux réactifs de la synthèse de l'acétate d'isoamyle ?", opts: ["Acide acétique + 3-méthylbutan-1-ol","Acide chlorhydrique + éthanol","Acide sulfurique + pentanol","Acide acétique + méthanol"], ans: 0 },
-  { q: "Quel est le catalyseur utilisé dans la réaction de Fischer ?", opts: ["H₂SO₄ (acide sulfurique)","NaOH","Pd/C","MgSO₄"], ans: 0 },
-  { q: "Pourquoi utilise-t-on un excès d'acide acétique dans cette réaction ?", opts: ["Pour déplacer l'équilibre vers la formation du produit (principe de Le Chatelier)","Pour éviter l'ébullition","Pour neutraliser le NaOH","Pour augmenter la densité"], ans: 0 },
-  { q: "Quel est le rôle du condenseur vertical (reflux) lors de la semaine 1 ?", opts: ["Recondenser les vapeurs et les retourner dans le ballon pour éviter les pertes","Refroidir le produit final","Séparer les réactifs","Absorber l'excès d'eau"], ans: 0 },
-  { q: "Pourquoi lave-t-on la phase organique avec de l'eau glacée distillée d'abord ?", opts: ["Pour éliminer l'acide acétique et l'alcool en excès","Pour neutraliser l'ester","Pour faire cristalliser les impuretés","Pour augmenter le rendement"], ans: 0 },
-  { q: "Quel est le rôle de NaHCO₃ (5%) lors du lavage de la phase organique ?", opts: ["Neutraliser l'acide acétique résiduel","Sécher la phase organique","Augmenter la solubilité de l'ester","Catalyser la réaction inverse"], ans: 0 },
-  { q: "Quel agent desséchant est utilisé pour sécher la phase organique ?", opts: ["MgSO₄ anhydre","NaCl","CaCl₂","Na₂SO₄"], ans: 0 },
-  { q: "À quel température (environ) recueille-t-on l'acétate d'isoamyle lors de la distillation simple ?", opts: ["142°C","90°C","117°C","65°C"], ans: 0 },
-  { q: "Quelle est la formule du rendement (%) ?", opts: ["(Masse obtenue / Masse théorique) × 100","(Masse théorique / Masse obtenue) × 100","(Volume obtenu / Volume théorique) × 100","Masse obtenue × 100"], ans: 0 },
-  { q: "En spectroscopie IR, à quelle fréquence approximative observe-t-on la vibration C=O d'un ester ?", opts: ["~1735 cm⁻¹","~3300 cm⁻¹","~2900 cm⁻¹","~1600 cm⁻¹"], ans: 0 },
-  { q: "Pourquoi ajoute-t-on des pierres ponce (nucléateurs d'ébullition) lors de la distillation ?", opts: ["Pour éviter l'ébullition violente (bumping)","Pour catalyser la réaction","Pour absorber l'humidité","Pour filtrer les impuretés"], ans: 0 },
-  { q: "La réaction d'estérification de Fischer est :", opts: ["Réversible (équilibre)","Irréversible","Spontanée sans catalyseur","Endothermique uniquement"], ans: 0 },
+  // Labs 3&4
+  { section: "🍌 Labs 3 & 4 — Estérification", q: "Les deux réactifs de la synthèse de l'acétate d'isoamyle ?", opts: ["Acide acétique + 3-méthylbutan-1-ol","Acide chlorhydrique + éthanol","Acide sulfurique + pentanol","Acide acétique + méthanol"], ans: 0 },
+  { q: "Catalyseur de l'estérification de Fischer ?", opts: ["H₂SO₄ (acide sulfurique)","NaOH","MgSO₄","Pd/C"], ans: 0 },
+  { q: "La réaction d'estérification est-elle réversible ?", opts: ["Oui, c'est un équilibre","Non, elle va jusqu'au bout","Seulement à haute température","Non, car le catalyseur la bloque"], ans: 0 },
+  { q: "Pourquoi utilise-t-on un excès d'acide acétique ?", opts: ["Pour déplacer l'équilibre vers l'ester (Le Chatelier)","Pour augmenter la température","Pour neutraliser le NaOH","Pour dissoudre le MgSO₄"], ans: 0 },
+  { q: "Rôle du condenseur vertical (reflux) ?", opts: ["Recondenser vapeurs et les retourner au ballon pour réaction sans perte","Refroidir le produit final","Filtrer les impuretés","Mesurer la température exacte"], ans: 0 },
+  { q: "Rôle du NaHCO₃ 5% lors des lavages ?", opts: ["Neutraliser l'acide acétique résiduel et H₂SO₄","Sécher la phase organique","Augmenter la densité de la phase aqueuse","Catalyser la réaction inverse"], ans: 0 },
+  { q: "Lors du lavage à NaHCO₃, on observe une effervescence. Pourquoi ?", opts: ["Dégagement de CO₂ : acide + bicarbonate → CO₂ + H₂O","Évaporation de l'acétate d'isoamyle","Réaction exothermique violente","Formation d'O₂ par décomposition"], ans: 0 },
+  { q: "Agent desséchant utilisé pour sécher la phase organique ?", opts: ["MgSO₄ anhydre","NaCl","CaCl₂","Na₂SO₄"], ans: 0 },
+  { q: "Température du plateau lors de la distillation de l'acétate d'isoamyle ?", opts: ["≈ 142°C","≈ 90°C","≈ 117,9°C","≈ 65°C"], ans: 0 },
+  { q: "À quoi servent les pierres ponce lors de la distillation ?", opts: ["Nucléateurs d'ébullition — éviter les à-coups (bumping)","Catalyser la décomposition","Absorber l'eau résiduelle","Filtrer les impuretés solides"], ans: 0 },
+  { q: "Bande IR caractéristique du C=O d'un ester ?", opts: ["≈ 1735 cm⁻¹","≈ 3300 cm⁻¹","≈ 2900 cm⁻¹","≈ 1600 cm⁻¹"], ans: 0 },
+  { q: "Dans l'ampoule à décanter, où se trouve la phase organique (acétate d'isoamyle) ?", opts: ["En haut (moins dense)","En bas (plus dense)","Les deux phases se mélangent","Cela dépend de la température"], ans: 0 },
 
-  // === LAB 5 — SAPONIFICATION ===
-  { section: "🧼 Lab 5 — Saponification", q: "La saponification est :", opts: ["L'hydrolyse basique des graisses (esters) par NaOH","L'estérification d'acides gras","La réduction de triglycérides","L'oxydation d'alcools gras"], ans: 0 },
-  { q: "Quels sont les deux produits de la saponification d'un triglycéride ?", opts: ["Glycérol + sels de carboxylates (savon)","Glycérol + acides gras libres","Eau + alcool","CO₂ + eau"], ans: 0 },
-  { q: "Pourquoi la réaction de saponification est-elle considérée irréversible ?", opts: ["La base forte (NaOH) déplace l'équilibre totalement vers les produits","La chaleur détruit les réactifs","L'eau est éliminée au fur et à mesure","Elle produit un gaz qui s'échappe"], ans: 0 },
-  { q: "Quelle est la structure amphiphile d'un savon ?", opts: ["Tête hydrophile (COO⁻Na⁺) + queue hydrophobe (chaîne alkyle)","Tête hydrophobe + queue hydrophile","Deux têtes hydrophiles","Molécule totalement apolaire"], ans: 0 },
-  { q: "Pourquoi le savon est-il inefficace en eau dure ?", opts: ["Les ions Ca²⁺ et Mg²⁺ forment un précipité insoluble avec le savon","L'eau dure est trop chaude","Le pH de l'eau dure détruit le savon","L'eau dure contient trop de NaCl"], ans: 0 },
-  { q: "Lors de la saponification au labo, que signifie atteindre la 'trace' ?", opts: ["L'émulsion s'épaissit (comme une crème), signe que la saponification avance","Le savon est complètement solidifié","La réaction est terminée et le pH est neutre","Une tache brune apparaît à la surface"], ans: 0 },
-  { q: "Quels acides gras sont mentionnés dans le labo de saponification ?", opts: ["Palmitique, stéarique, oléique, arachidonique","Citrique, tartrique, lactique","Acétique, propionique, butyrique","Glutamique, aspartique, lysique"], ans: 0 },
-  { q: "Pourquoi laisse-t-on curer le savon pendant 2 semaines ?", opts: ["Pour permettre à l'excès de NaOH de réagir complètement et adoucir le savon","Pour le parfumer davantage","Pour augmenter sa taille","Pour le durcir par évaporation de l'huile"], ans: 0 },
-  { q: "Quelle huile végétale est utilisée en PLUS grande quantité dans le protocole du labo ?", opts: ["Huile d'olive (~38g)","Huile de coco (~12g)","Huile de palme","Huile de tournesol"], ans: 0 },
-  { q: "Quelle réaction se passe quand du savon rencontre CaCl₂ ?", opts: ["2 RCOONa + CaCl₂ → (RCOO)₂Ca↓ + 2 NaCl","RCOONa + CaCl₂ → RCOOCa + NaCl","Aucune réaction","RCOONa + CaCl₂ → RCOOH + NaCaCl"], ans: 0 },
+  // Lab 5
+  { section: "🧼 Lab 5 — Saponification", q: "La saponification est :", opts: ["Hydrolyse basique d'esters (graisses) par NaOH","Estérification d'acides gras","Réduction de triglycérides","Oxydation d'alcools gras"], ans: 0 },
+  { q: "Produits de la saponification d'un triglycéride ?", opts: ["Glycérol + sels de carboxylates (savon)","Glycérol + acides gras libres","Eau + acides gras","CO₂ + glycérol"], ans: 0 },
+  { q: "Pourquoi la saponification est-elle irréversible ?", opts: ["La base forte déplace totalement l'équilibre vers les produits","La chaleur détruit l'ester","L'eau est éliminée au fur et à mesure","La réaction produit un gaz"], ans: 0 },
+  { q: "Structure amphiphile d'un savon ?", opts: ["Tête hydrophile (COO⁻Na⁺) + queue hydrophobe (alkyle)","Tête hydrophobe + queue hydrophile","Deux têtes hydrophiles","Molécule entièrement apolaire"], ans: 0 },
+  { q: "Pourquoi le savon est-il inefficace en eau dure ?", opts: ["Ca²⁺/Mg²⁺ forment un précipité insoluble avec le savon","L'eau dure est trop acide","Le pH détruit la tête hydrophile","L'eau dure contient trop de NaCl"], ans: 0 },
+  { q: "Que signifie atteindre la 'trace' lors de la saponification ?", opts: ["L'émulsion s'épaissit — signe d'avancement de la réaction","La réaction est totalement terminée","Le pH est neutre","Le savon a solidifié"], ans: 0 },
+  { q: "Lequel de ces acides gras est INSATURÉ ?", opts: ["Acide oléique (C₁₇H₃₃COOH)","Acide palmitique (C₁₅H₃₁COOH)","Acide stéarique (C₁₇H₃₅COOH)","Tous sont saturés"], ans: 0 },
+  { q: "Réaction du savon avec CaCl₂ (eau dure) ?", opts: ["2 RCOONa + CaCl₂ → (RCOO)₂Ca↓ + 2 NaCl","RCOONa + CaCl₂ → RCOOCa + NaCl","Aucune réaction","RCOONa + CaCl₂ → RCOOH + NaCl"], ans: 0 },
+  { q: "Pourquoi cure-t-on le savon 2 semaines ?", opts: ["Pour que l'excès de NaOH réagisse complètement et le savon s'adoucisse","Pour le parfumer","Pour augmenter sa taille","Pour le durcir par évaporation"], ans: 0 },
 ];
 
 let answered = {};
 
-function buildQuiz() {
-  const container = document.getElementById('quiz');
+function buildQcm() {
+  const container = document.getElementById('qcm-quiz');
   container.innerHTML = '';
-  let currentSection = '';
+  let cur = '';
   questions.forEach((q, i) => {
-    if (q.section && q.section !== currentSection) {
-      currentSection = q.section;
+    if (q.section && q.section !== cur) {
+      cur = q.section;
       const st = document.createElement('h2');
       st.className = 'section-title';
-      st.textContent = currentSection;
+      st.textContent = cur;
       container.appendChild(st);
     }
     const div = document.createElement('div');
     div.className = 'question';
-    div.id = 'q' + i;
-    const qnum = i + 1;
-    div.innerHTML = `<p><strong>${qnum}.</strong> ${q.q}</p>
+    div.innerHTML = `<p><strong>${i+1}.</strong> ${q.q}</p>
       <div class="options" id="opts${i}">
         ${q.opts.map((o, j) => `<label id="lbl${i}_${j}"><input type="radio" name="q${i}" value="${j}" onchange="checkOne(${i})"> ${o}</label>`).join('')}
       </div>
@@ -172,40 +411,33 @@ function buildQuiz() {
 
 function checkOne(i) {
   if (answered[i] !== undefined) return;
-  const selected = document.querySelector(`input[name="q${i}"]:checked`);
-  if (!selected) return;
-  const val = parseInt(selected.value);
+  const sel = document.querySelector(`input[name="q${i}"]:checked`);
+  if (!sel) return;
+  const val = parseInt(sel.value);
   const correct = questions[i].ans;
   answered[i] = val === correct;
-
-  // disable all options
   document.querySelectorAll(`input[name="q${i}"]`).forEach(inp => inp.disabled = true);
-
-  const lbl = document.getElementById(`lbl${i}_${val}`);
-  lbl.classList.add(val === correct ? 'correct' : 'wrong');
-  if (val !== correct) {
-    document.getElementById(`lbl${i}_${correct}`).classList.add('reveal');
-  }
+  document.getElementById(`lbl${i}_${val}`).classList.add(val === correct ? 'correct' : 'wrong');
+  if (val !== correct) document.getElementById(`lbl${i}_${correct}`).classList.add('reveal');
   const fb = document.getElementById(`fb${i}`);
   fb.style.display = 'block';
   fb.className = 'feedback ' + (val === correct ? 'correct-msg' : 'wrong-msg');
-  fb.textContent = val === correct ? '✓ Bonne réponse !' : `✗ La bonne réponse était : « ${questions[i].opts[correct]} »`;
+  fb.textContent = val === correct ? '✓ Bonne réponse !' : `✗ Bonne réponse : « ${questions[i].opts[correct]} »`;
   updateScore();
 }
 
 function checkAll() {
   questions.forEach((q, i) => {
     if (answered[i] !== undefined) return;
-    const selected = document.querySelector(`input[name="q${i}"]:checked`);
-    if (selected) { checkOne(i); return; }
-    // reveal unanswered
+    const sel = document.querySelector(`input[name="q${i}"]:checked`);
+    if (sel) { checkOne(i); return; }
     answered[i] = false;
     document.querySelectorAll(`input[name="q${i}"]`).forEach(inp => inp.disabled = true);
     document.getElementById(`lbl${i}_${q.ans}`).classList.add('reveal');
     const fb = document.getElementById(`fb${i}`);
     fb.style.display = 'block';
     fb.className = 'feedback wrong-msg';
-    fb.textContent = `— Non répondu. La réponse était : « ${q.opts[q.ans]} »`;
+    fb.textContent = `— Non répondu. Réponse : « ${q.opts[q.ans]} »`;
   });
   updateScore();
 }
@@ -213,63 +445,99 @@ function checkAll() {
 function updateScore() {
   const total = Object.keys(answered).length;
   const correct = Object.values(answered).filter(Boolean).length;
-  document.getElementById('score-num').textContent = `${correct} / ${total}`;
-  const pct = questions.length > 0 ? (total / questions.length) * 100 : 0;
-  document.getElementById('progress').style.width = pct + '%';
-  if (total === 0) {
-    document.getElementById('score-msg').textContent = 'Réponds aux questions pour voir ton score';
-  } else if (total === questions.length) {
-    const p = Math.round((correct / questions.length) * 100);
-    document.getElementById('score-msg').textContent = `Quiz terminé ! ${p}% de réussite${p >= 80 ? ' 🎉' : p >= 60 ? ' 💪' : ' 📚 Révise encore !'}`;
+  document.getElementById('qcm-score-num').textContent = `${correct} / ${total}`;
+  document.getElementById('qcm-progress').style.width = (total / questions.length * 100) + '%';
+  if (total === 0) document.getElementById('qcm-score-msg').textContent = 'Réponds aux questions pour voir ton score';
+  else if (total === questions.length) {
+    const p = Math.round(correct / questions.length * 100);
+    document.getElementById('qcm-score-msg').textContent = `Terminé ! ${p}%${p >= 80 ? ' 🎉' : p >= 60 ? ' 💪' : ' 📚 Révise encore !'}`;
   } else {
-    document.getElementById('score-msg').textContent = `${total} question${total > 1 ? 's' : ''} répondue${total > 1 ? 's' : ''} sur ${questions.length}`;
+    document.getElementById('qcm-score-msg').textContent = `${total} / ${questions.length} répondues`;
   }
 }
 
-function resetQuiz() {
+function resetQcm() {
   answered = {};
-  buildQuiz();
+  buildQcm();
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
-// JUMPSCARE
+// ===== FLIP CARDS =====
+const openQuestions = [
+  { s: "Lab 1 — CCM", q: "Explique le principe de la CCM en 3 points.", a: "1) Séparation par adsorption sélective entre phase stationnaire (silice polaire) et phase mobile (solvant).\n2) Composé polaire → forte adsorption sur silice → migre peu → Rf faible.\n3) Rf = distance composé / distance front solvant (constante physique entre 0 et 1)." },
+  { s: "Lab 1 — CCM", q: "Comment identifier un médicament inconnu par CCM ?", a: "Comparer les Rf de l'inconnu avec les Rf des composés purs de référence (1=ac. acétylsalicylique, 2=acétaminophène, 4=caféine, 5=phénacétine, 6=salicylamide). Le nombre de taches = nombre de composants. Positions identiques → même composé." },
+  { s: "Lab 1 — CCM", q: "Pourquoi utiliser lampe UV ET chambre à iode ? Que révèle chacune ?", a: "UV : révèle composés aromatiques (absorbent UV → taches sombres sur fond fluorescent).\nIode : révèle composés insaturés (s'y fixe → taches brunes). Les deux méthodes sont complémentaires — un composé peut être visible à l'une mais pas l'autre." },
+  { s: "Lab 2 — Structures et isomérie", q: "Calcule le DI de C₆H₆ (benzène). Qu'est-ce que cela représente ?", a: "DI = (2×6 + 2 − 6) / 2 = (14 − 6) / 2 = 4.\n→ 3 doubles liaisons + 1 cycle aromatique = noyau benzénique." },
+  { s: "Lab 2 — Structures et isomérie", q: "Quelle est la différence entre isomère de position et isomère de fonction ? Donne un exemple de chaque.", a: "Position : même groupe fonctionnel, endroit différent. Ex : 1-propanol vs 2-propanol.\nFonction : même formule moléculaire, groupes fonctionnels différents. Ex : éthanol (alcool, C₂H₆O) vs méthoxyméthane (éther, C₂H₆O)." },
+  { s: "Lab 2 — Structures et isomérie", q: "Nomme les 3 isomères de C₅H₁₂ et décris leur squelette.", a: "1) n-pentane : chaîne droite C-C-C-C-C.\n2) 2-méthylbutane : chaîne de 4C + 1 méthyle en C2.\n3) 2,2-diméthylpropane (néopentane) : 1 carbone central lié à 4 méthyles." },
+  { s: "Lab 2 — Structures et isomérie", q: "Explique les conventions de Cram et la projection de Newman.", a: "Cram : trait plein = dans le plan · triangle plein = vers l'avant (vers lecteur) · triangle hachuré = vers l'arrière.\nNewman : vue le long d'un lien C-C · carbone avant = point central avec 3 liaisons · carbone arrière = cercle avec 3 liaisons. Permet de visualiser conformations (décalée = stable / éclipsée = instable)." },
+  { s: "Labs 3 & 4 — Estérification", q: "Écris l'équation globale de la synthèse de l'acétate d'isoamyle.", a: "CH₃COOH + (CH₃)₂CHCH₂CH₂OH ⇌ CH₃COOCH₂CH₂CH(CH₃)₂ + H₂O\n(Acide acétique + 3-méthylbutan-1-ol ⇌ Acétate d'isoamyle + Eau)\nCatalyseur : H₂SO₄, chauffage." },
+  { s: "Labs 3 & 4 — Estérification", q: "Pourquoi utiliser un excès d'acide acétique plutôt qu'un excès d'alcool ?", a: "Réaction réversible → Le Chatelier : augmenter [réactif] déplace l'équilibre vers les produits. On choisit l'acide acétique car il est moins cher, moins odorant et plus facile à éliminer par lavage à l'eau que le 3-méthylbutan-1-ol." },
+  { s: "Labs 3 & 4 — Estérification", q: "Décris les 4 étapes de lavage de la phase organique. Quel est le rôle de chacune ?", a: "1) Eau distillée glacée : dissout et élimine acide acétique et alcool (polaires).\n2) Eau distillée : retire impuretés polaires résiduelles.\n3) NaHCO₃ 5% : neutralise acide acétique résiduel + H₂SO₄ (dégagement CO₂).\n4) MgSO₄ anhydre : agent desséchant — absorbe l'eau résiduelle dans la phase organique." },
+  { s: "Labs 3 & 4 — Estérification", q: "Comment confirme-t-on par IR que l'ester a bien été formé ?", a: "Présence d'une bande C=O forte à ≈1735 cm⁻¹ (caractéristique ester).\nBandes C-O à 1000-1300 cm⁻¹.\nAbsence du pic large O-H de l'acide carboxylique (2500-3300 cm⁻¹) confirme la conversion de l'acide en ester." },
+  { s: "Labs 3 & 4 — Estérification", q: "Explique le rôle du reflux et pourquoi on ouvre l'eau du condenseur AVANT de chauffer.", a: "Reflux : le condenseur vertical refroidit les vapeurs qui remontent, les recondense et les retourne dans le ballon. Permet de chauffer longtemps (90°C, 30 min) sans perdre les réactifs volatils.\nOuvrir l'eau avant chauffage : éviter que le condenseur chauffe sans refroidissement, ce qui rendrait le reflux inefficace." },
+  { s: "Lab 5 — Saponification", q: "Écris et explique l'équation globale de saponification d'un triglycéride.", a: "Triglycéride + 3 NaOH → Glycérol + 3 RCOO⁻Na⁺\n\nLe triglycéride (triester du glycérol avec 3 acides gras) est hydrolysé en milieu basique fort. NaOH brise les liaisons ester → libère glycérol + sels de carboxylate sodique (savon). Réaction non réversible." },
+  { s: "Lab 5 — Saponification", q: "Explique la structure amphiphile du savon et son action nettoyante.", a: "Le savon possède :\n- Tête hydrophile (COO⁻Na⁺) : ionique, attirée par l'eau.\n- Queue hydrophobe (longue chaîne alkyle) : attirée par les graisses.\nEn solution : formation de micelles (queues vers l'intérieur emprisonnent la graisse, têtes vers l'extérieur en contact avec l'eau). La graisse est émulsifiée et éliminée par rinçage." },
+  { s: "Lab 5 — Saponification", q: "Pourquoi le savon est-il inefficace en eau dure ? Donne la réaction.", a: "Eau dure contient Ca²⁺ et Mg²⁺.\nRéaction : 2 RCOONa + CaCl₂ → (RCOO)₂Ca↓ + 2 NaCl\nLe sel de calcium (RCOO)₂Ca est insoluble → précipité blanc/gélatineux. Le savon ne forme plus de micelles → perd son efficacité détergente. C'est pourquoi on utilise des détergents synthétiques en eau dure." },
+  { s: "Lab 5 — Saponification", q: "Décris le protocole de fabrication du savon au labo.", a: "1) Peser ~12g huile coco + ~38g huile olive → fondre à 60°C.\n2) Dissoudre ~7g NaOH dans 17mL H₂O (sous hotte, exothermique).\n3) Verser NaOH dans les huiles, agiter 30-45 min à 50-60°C.\n4) Observer la trace (émulsion qui s'épaissit).\n5) Vérifier pH (~basique).\n6) Ajouter huile essentielle, couler en moule.\n7) Solidifier 24h, démouler, curer 2 semaines." },
+];
+
+function buildFlip() {
+  const grid = document.getElementById('flip-quiz');
+  let cur = '';
+  openQuestions.forEach((item, i) => {
+    if (item.s !== cur) {
+      cur = item.s;
+      const sep = document.createElement('div');
+      sep.className = 'flip-section-sep';
+      sep.textContent = cur;
+      grid.appendChild(sep);
+    }
+    const wrap = document.createElement('div');
+    wrap.className = 'flip-wrap';
+    wrap.innerHTML = `<div class="flip-inner">
+      <div class="flip-front">
+        <div class="card-num">Q${i+1}</div>
+        <div class="card-q">${item.q}</div>
+        <div class="card-hint">↩ cliquer pour voir la réponse</div>
+      </div>
+      <div class="flip-back">
+        <div class="card-label">Réponse</div>
+        <div class="card-a">${item.a.replace(/\n/g, '<br>')}</div>
+      </div>
+    </div>`;
+    wrap.addEventListener('click', () => wrap.classList.toggle('flipped'));
+    grid.appendChild(wrap);
+  });
+}
+
+// ===== JUMPSCARE =====
 function playScream() {
   try {
     const ctx = new (window.AudioContext || window.webkitAudioContext)();
     const dur = 1.8;
-    // layered noise bursts to simulate a scream
     [0, 0.05, 0.1].forEach(offset => {
       const buf = ctx.createBuffer(1, ctx.sampleRate * dur, ctx.sampleRate);
       const data = buf.getChannelData(0);
-      for (let i = 0; i < data.length; i++) {
-        data[i] = (Math.random() * 2 - 1) * Math.exp(-i / (ctx.sampleRate * 0.4));
-      }
+      for (let i = 0; i < data.length; i++) data[i] = (Math.random() * 2 - 1) * Math.exp(-i / (ctx.sampleRate * 0.4));
       const src = ctx.createBufferSource();
       src.buffer = buf;
-      // bandpass filter around voice frequencies
       const bp = ctx.createBiquadFilter();
-      bp.type = 'bandpass';
-      bp.frequency.value = 900 + offset * 3000;
-      bp.Q.value = 0.8;
+      bp.type = 'bandpass'; bp.frequency.value = 900 + offset * 3000; bp.Q.value = 0.8;
       const gain = ctx.createGain();
       gain.gain.setValueAtTime(3.5, ctx.currentTime + offset);
       gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + offset + dur);
-      src.connect(bp);
-      bp.connect(gain);
-      gain.connect(ctx.destination);
+      src.connect(bp); bp.connect(gain); gain.connect(ctx.destination);
       src.start(ctx.currentTime + offset);
     });
-    // low thud
     const osc = ctx.createOscillator();
     const g2 = ctx.createGain();
     osc.frequency.setValueAtTime(80, ctx.currentTime);
     osc.frequency.exponentialRampToValueAtTime(20, ctx.currentTime + 0.5);
     g2.gain.setValueAtTime(4, ctx.currentTime);
     g2.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.6);
-    osc.connect(g2);
-    g2.connect(ctx.destination);
-    osc.start();
-    osc.stop(ctx.currentTime + 0.6);
+    osc.connect(g2); g2.connect(ctx.destination);
+    osc.start(); osc.stop(ctx.currentTime + 0.6);
   } catch(e) {}
 }
 
@@ -287,62 +555,8 @@ function dismissSasha() {
   localStorage.setItem('sasha_seen', '1');
 }
 
-// === OPEN QUESTIONS ===
-const openQuestions = [
-  // Lab 1
-  { section: "Lab 1 — CCM", q: "Explique le principe de la chromatographie sur couche mince (CCM) en quelques phrases.", a: "La CCM sépare des composés selon leur affinité relative entre une phase stationnaire (gel de silice polaire) et une phase mobile (solvant). Les composés plus affins pour la phase stationnaire migrent moins vite, donnant un Rf faible. Ceux plus affins pour le solvant migrent plus loin, donnant un Rf élevé." },
-  { section: "Lab 1 — CCM", q: "Comment identifie-t-on un médicament inconnu à partir de sa plaque CCM ?", a: "On compare les valeurs de Rf de l'inconnu avec ceux des composés purs de référence (acide acétylsalicylique, acétaminophène, caféine, phénacétine, salicylamide). Si les taches de l'inconnu coïncident avec certaines références, le médicament contient ces composés." },
-  { section: "Lab 1 — CCM", q: "Pourquoi utilise-t-on à la fois la lampe UV et la chambre à iode pour révéler les taches ?", a: "La lampe UV détecte les composés aromatiques (qui absorbent l'UV). La chambre à iode révèle les composés insaturés et certains composés organiques. Les deux méthodes sont complémentaires : un composé peut être visible à l'une mais pas l'autre." },
-  // Lab 2
-  { section: "Lab 2 — Modèles moléculaires", q: "Calcule le degré d'insaturation de C₆H₆ (benzène) et explique ce qu'il signifie.", a: "DI = (2×6 + 2 − 6) / 2 = (14 − 6) / 2 = 4. Cela correspond à 3 doubles liaisons + 1 cycle (cycle benzénique aromatique). Un DI ≥ 4 avec un cycle aromatique est cohérent." },
-  { section: "Lab 2 — Modèles moléculaires", q: "Quelle est la différence entre un isomère de position et un isomère fonctionnel ? Donne un exemple de chaque.", a: "Isomère de position : même groupe fonctionnel, mais à un endroit différent sur la chaîne. Ex : 1-propanol vs 2-propanol. Isomère fonctionnel : même formule moléculaire, groupes fonctionnels différents. Ex : éthanol (alcool) vs méthoxyméthane (éther), C₂H₆O." },
-  { section: "Lab 2 — Modèles moléculaires", q: "Décris la géométrie d'un carbone sp² et donne un exemple de molécule contenant ce type de carbone.", a: "Un carbone sp² forme 3 liaisons σ dans un plan, avec des angles de 120°. La géométrie est trigonale plane. Il participe à une double liaison (une liaison π hors du plan). Exemple : l'éthylène (CH₂=CH₂) ou l'acide acétique (groupement C=O)." },
-  { section: "Lab 2 — Modèles moléculaires", q: "Quelles sont les 3 conformations importantes d'un alcane et laquelle est la plus stable ?", a: "1) Décalée (staggered) : groupes alternés, liaisons éloignées → plus stable. 2) Éclipsée (eclipsed) : groupes alignés, répulsion maximale → moins stable. 3) Gauche : décalée mais groupes volumineux proches → intermédiaire. La conformation décalée anti est la plus stable." },
-  // Labs 3&4
-  { section: "Labs 3&4 — Estérification", q: "Écris l'équation globale de la synthèse de l'acétate d'isoamyle (huile de banane).", a: "CH₃COOH + (CH₃)₂CHCH₂CH₂OH ⇌ CH₃COOCH₂CH₂CH(CH₃)₂ + H₂O\n(Acide acétique + 3-méthylbutan-1-ol ⇌ Acétate d'isoamyle + Eau, catalysée par H₂SO₄, chauffée)" },
-  { section: "Labs 3&4 — Estérification", q: "Explique pourquoi on utilise un excès d'acide acétique plutôt qu'un excès d'alcool.", a: "La réaction est à l'équilibre (réversible). Selon le principe de Le Chatelier, augmenter la concentration d'un réactif déplace l'équilibre vers les produits. On choisit l'acide acétique car il est moins cher, moins dangereux et plus facile à éliminer par lavage à l'eau que l'alcool isoamylique." },
-  { section: "Labs 3&4 — Estérification", q: "Décris les étapes de purification de l'acétate d'isoamyle après la réaction (semaine 1).", a: "1) Lavage eau glacée distillée : élimine acide acétique et alcool (solubles dans l'eau). 2) Lavage eau distillée : retire les impuretés restantes. 3) Lavage NaHCO₃ 5% : neutralise et élimine l'acide acétique résiduel (COO⁻ soluble). 4) Séchage sur MgSO₄ anhydre : absorbe l'eau résiduelle dans la phase organique." },
-  { section: "Labs 3&4 — Estérification", q: "Comment calcule-t-on le rendement d'une réaction ? Explique les facteurs qui peuvent le diminuer.", a: "Rendement (%) = (masse obtenue / masse théorique) × 100. Facteurs de diminution : réaction incomplète (équilibre), pertes lors des lavages/transferts, distillation imprécise (mauvaise collecte du plateau), présence d'impuretés dans le produit final." },
-  { section: "Labs 3&4 — Estérification", q: "Quels pics IR confirment la présence de l'ester (acétate d'isoamyle) et pourquoi sont-ils caractéristiques ?", a: "1) C=O ester : ~1735 cm⁻¹ (absorption forte, typique des esters, légèrement plus élevé que cétone ~1715 cm⁻¹). 2) C-O : bandes multiples entre 1000-1300 cm⁻¹. L'absence de pic large O-H (~3300 cm⁻¹) confirme qu'il n'y a plus d'acide carboxylique." },
-  // Lab 5
-  { section: "Lab 5 — Saponification", q: "Écris l'équation générale de la saponification d'un triglycéride.", a: "Triglycéride + 3 NaOH → Glycérol + 3 RCOO⁻Na⁺\nOù R est une longue chaîne alkyle (acide gras). Les sels de carboxylate (RCOO⁻Na⁺) sont le savon." },
-  { section: "Lab 5 — Saponification", q: "Explique la structure amphiphile d'un savon et son rôle dans le nettoyage.", a: "Le savon possède une tête hydrophile (COO⁻Na⁺, ionique, attirée par l'eau) et une queue hydrophobe (chaîne alkyle longue, attirée par les graisses). En solution, les molécules s'organisent en micelles : queues vers l'intérieur (emprisonnent la graisse), têtes vers l'extérieur (en contact avec l'eau). La graisse est ainsi émulsifiée et éliminée par rinçage." },
-  { section: "Lab 5 — Saponification", q: "Pourquoi le savon fait-il des dépôts en eau dure ? Écris la réaction.", a: "Les ions Ca²⁺ et Mg²⁺ présents dans l'eau dure réagissent avec les savons pour former des sels insolubles :\n2 RCOONa + CaCl₂ → (RCOO)₂Ca↓ + 2 NaCl\nLe précipité (RCOO)₂Ca est insoluble : le savon perd son efficacité et laisse des résidus blanchâtres." },
-  { section: "Lab 5 — Saponification", q: "Décris brièvement le protocole de fabrication du savon au labo (étapes clés).", a: "1) Fondre ~12g huile de coco + ~38g huile d'olive à 60°C. 2) Dissoudre ~7g NaOH dans 17mL d'eau (solution lessive). 3) Ajouter la lessive à l'huile, mélanger 30-45 min à 50-60°C. 4) Observer la 'trace' (épaississement). 5) Vérifier pH (~9-10). 6) Ajouter huile essentielle. 7) Couler en moule, solidifier 24h, curer 2 semaines." },
-];
-
-function buildFlipQuiz() {
-  const grid = document.getElementById('flip-quiz');
-  let currentSection = '';
-  openQuestions.forEach((item, i) => {
-    if (item.section !== currentSection) {
-      currentSection = item.section;
-      const sep = document.createElement('div');
-      sep.style.cssText = 'grid-column:1/-1; font-size:0.85rem; color:#7dd3fc; border-left:3px solid #38bdf8; padding-left:0.6rem; margin-top:0.5rem;';
-      sep.textContent = currentSection;
-      grid.appendChild(sep);
-    }
-    const wrap = document.createElement('div');
-    wrap.className = 'flip-wrap';
-    wrap.innerHTML = `
-      <div class="flip-inner">
-        <div class="flip-front">
-          <div class="card-num">Q${i + 1}</div>
-          <div class="card-q">${item.q}</div>
-          <div class="card-hint">↩ cliquer pour voir la réponse</div>
-        </div>
-        <div class="flip-back">
-          <div class="card-label">Réponse</div>
-          <div class="card-a">${item.a.replace(/\n/g, '<br>')}</div>
-        </div>
-      </div>`;
-    wrap.addEventListener('click', () => wrap.classList.toggle('flipped'));
-    grid.appendChild(wrap);
-  });
-}
-
-buildQuiz();
-buildFlipQuiz();
+buildQcm();
+buildFlip();
 initSasha();
 </script>
 </body>
