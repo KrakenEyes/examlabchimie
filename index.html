@@ -87,12 +87,17 @@ h1 { font-size: 1.6rem; color: #38bdf8; margin-bottom: 0.3rem; }
 .flip-back .card-a { font-size: 0.82rem; line-height: 1.5; color: #c7d2fe; }
 .flip-back .card-label { font-size: 0.68rem; color: #818cf8; margin-bottom: 0.3rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; }
 
-/* JUMPSCARE */
-#sasha { display: none; position: fixed; inset: 0; background: #000; z-index: 9999; cursor: pointer; justify-content: center; align-items: center; flex-direction: column; }
-#sasha.active { display: flex; }
+/* JUMPSCARE shared */
+#sasha, #clown-scare { display: none; position: fixed; inset: 0; background: #000; z-index: 9999; cursor: pointer; justify-content: center; align-items: center; flex-direction: column; }
+#sasha.active, #clown-scare.active { display: flex; }
+/* peur.jpg scare */
+#sasha-img { max-height: 80vh; max-width: 90vw; object-fit: contain; animation: clownshake 0.07s infinite; }
+#sasha-text { font-size: 16vw; font-weight: 900; color: #ef4444; text-shadow: 0 0 40px #ef4444, 0 0 80px #ff0000; letter-spacing: -0.02em; animation: sashapulse 0.15s infinite alternate; user-select: none; margin-top: 0.5rem; }
+#sasha-sub { color: #fca5a5; font-size: 1.3rem; margin-top: 0.5rem; animation: sashapulse 0.2s infinite alternate; }
+/* clown scare */
 #sasha-clown { font-size: 28vw; line-height: 1; animation: clownshake 0.08s infinite; filter: drop-shadow(0 0 30px #ff0000); }
-#sasha-text { font-size: 18vw; font-weight: 900; color: #ef4444; text-shadow: 0 0 40px #ef4444, 0 0 80px #ff0000; letter-spacing: -0.02em; animation: sashapulse 0.15s infinite alternate; user-select: none; }
-#sasha-sub { color: #fca5a5; font-size: 1.3rem; margin-top: 1rem; animation: sashapulse 0.2s infinite alternate; }
+#clown-text { font-size: 18vw; font-weight: 900; color: #ef4444; text-shadow: 0 0 40px #ef4444, 0 0 80px #ff0000; letter-spacing: -0.02em; animation: sashapulse 0.15s infinite alternate; user-select: none; }
+#clown-sub { color: #fca5a5; font-size: 1.3rem; margin-top: 1rem; animation: sashapulse 0.2s infinite alternate; }
 @keyframes sashapulse { from { transform: scale(1); } to { transform: scale(1.05); } }
 @keyframes clownshake { 0%{transform:translate(-4px,-3px) rotate(-2deg);} 25%{transform:translate(4px,3px) rotate(2deg);} 50%{transform:translate(-3px,4px) rotate(-1deg);} 75%{transform:translate(3px,-4px) rotate(1deg);} 100%{transform:translate(-4px,2px) rotate(-2deg);} }
 </style>
@@ -312,11 +317,18 @@ Triglycéride + 3 NaOH → Glycérol + 3 RCOO⁻Na⁺ (savon)
   <div class="flip-grid" id="flip-quiz"></div>
 </div>
 
-<!-- JUMPSCARE -->
+<!-- JUMPSCARE 30s — peur.jpg -->
 <div id="sasha" onclick="dismissSasha()">
-  <div id="sasha-clown">🤡</div>
+  <img id="sasha-img" src="peur.jpg" alt="">
   <div id="sasha-text">SASHA</div>
   <div id="sasha-sub">👀 clique pour continuer</div>
+</div>
+
+<!-- JUMPSCARE flip card — clown -->
+<div id="clown-scare" onclick="dismissClown()">
+  <div id="sasha-clown">🤡</div>
+  <div id="clown-text">SASHA</div>
+  <div id="clown-sub">👀 clique pour continuer</div>
 </div>
 
 <script>
@@ -526,7 +538,11 @@ function buildFlip() {
         <div class="card-a">${item.a.replace(/\n/g, '<br>')}</div>
       </div>
     </div>`;
-    wrap.addEventListener('click', () => wrap.classList.toggle('flipped'));
+    wrap.addEventListener('click', () => {
+      const wasFlipped = wrap.classList.contains('flipped');
+      wrap.classList.toggle('flipped');
+      if (!wasFlipped && i === 0) triggerClown();
+    });
     grid.appendChild(wrap);
   });
 }
@@ -535,31 +551,36 @@ function buildFlip() {
 function playScream() {
   try {
     const ctx = new (window.AudioContext || window.webkitAudioContext)();
-    const dur = 1.8;
-    [0, 0.05, 0.1].forEach(offset => {
+    const master = ctx.createGain();
+    master.gain.setValueAtTime(12, ctx.currentTime);
+    master.connect(ctx.destination);
+    const dur = 2.0;
+    [0, 0.04, 0.08, 0.13].forEach(offset => {
       const buf = ctx.createBuffer(1, ctx.sampleRate * dur, ctx.sampleRate);
       const data = buf.getChannelData(0);
-      for (let i = 0; i < data.length; i++) data[i] = (Math.random() * 2 - 1) * Math.exp(-i / (ctx.sampleRate * 0.4));
+      for (let i = 0; i < data.length; i++) data[i] = (Math.random() * 2 - 1) * Math.exp(-i / (ctx.sampleRate * 0.35));
       const src = ctx.createBufferSource();
       src.buffer = buf;
       const bp = ctx.createBiquadFilter();
-      bp.type = 'bandpass'; bp.frequency.value = 900 + offset * 3000; bp.Q.value = 0.8;
+      bp.type = 'bandpass'; bp.frequency.value = 800 + offset * 5000; bp.Q.value = 0.6;
       const gain = ctx.createGain();
-      gain.gain.setValueAtTime(3.5, ctx.currentTime + offset);
+      gain.gain.setValueAtTime(4, ctx.currentTime + offset);
       gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + offset + dur);
-      src.connect(bp); bp.connect(gain); gain.connect(ctx.destination);
+      src.connect(bp); bp.connect(gain); gain.connect(master);
       src.start(ctx.currentTime + offset);
     });
     const osc = ctx.createOscillator();
     const g2 = ctx.createGain();
-    osc.frequency.setValueAtTime(80, ctx.currentTime);
-    osc.frequency.exponentialRampToValueAtTime(20, ctx.currentTime + 0.5);
-    g2.gain.setValueAtTime(4, ctx.currentTime);
-    g2.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.6);
-    osc.connect(g2); g2.connect(ctx.destination);
-    osc.start(); osc.stop(ctx.currentTime + 0.6);
+    osc.frequency.setValueAtTime(120, ctx.currentTime);
+    osc.frequency.exponentialRampToValueAtTime(15, ctx.currentTime + 0.7);
+    g2.gain.setValueAtTime(6, ctx.currentTime);
+    g2.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.8);
+    osc.connect(g2); g2.connect(master);
+    osc.start(); osc.stop(ctx.currentTime + 0.8);
   } catch(e) {}
 }
+
+let clownDone = false;
 
 function initSasha() {
   if (localStorage.getItem('sasha_seen')) return;
@@ -573,6 +594,17 @@ function initSasha() {
 function dismissSasha() {
   document.getElementById('sasha').classList.remove('active');
   localStorage.setItem('sasha_seen', '1');
+}
+
+function triggerClown() {
+  if (clownDone) return;
+  clownDone = true;
+  playScream();
+  document.getElementById('clown-scare').classList.add('active');
+}
+
+function dismissClown() {
+  document.getElementById('clown-scare').classList.remove('active');
 }
 
 buildQcm();
